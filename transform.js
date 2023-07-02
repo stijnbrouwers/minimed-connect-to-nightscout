@@ -187,7 +187,7 @@ function bgCheckEntries(data, offset, offsetMilliseconds) {
           'glucose': marker['value'],
           "glucoseType": "Finger"
         };
-    }).sort(function(a,b) { return a.date - b.date; });
+    }).sort(function(a,b) { return a['created_at'] - b['created_at']; });
 }
 
 function treatmentEntries(data, offset, offsetMilliseconds) {
@@ -210,17 +210,17 @@ function treatmentEntries(data, offset, offsetMilliseconds) {
           'carbs': marker['amount'] || 0,
           'insulin': marker['deliveredExtendedAmount'] != null && marker['deliveredFastAmount'] != null ? marker.deliveredExtendedAmount + marker.deliveredFastAmount : 0
         };
-    }).sort(function(a,b) { return a.date - b.date; });
+    }).sort(function(a,b) { return a['created_at'] - b['created_at']; });
 
     return mergeInsulinWithMealTreatments(treatments);
 }
 
 function mergeInsulinWithMealTreatments(treatments) {
   treatments.forEach((treatment) => {
-    if(treatment.eventType === "INSULIN") {
+    if(treatment.eventType?.toLocaleUpperCase() === "INSULIN") {
       treatment.eventType = "Insulin";
       var matchingMeal = treatments.find((candidate) => {
-        return candidate.dateTime === treatment.dateTime && candidate.eventType === "MEAL";
+        return candidate.dateTime === treatment.dateTime && candidate.eventType?.toLocaleUpperCase() === "MEAL";
       });
       if(matchingMeal) {
         treatment.carbs = matchingMeal.carbs;
