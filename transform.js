@@ -203,7 +203,7 @@ function treatmentEntries(data, offset, offsetMilliseconds) {
         //return marker
         var timestamp = parsePumpTime(marker['dateTime'], offset, offsetMilliseconds, data['medicalDeviceFamily']);
         return {
-          'eventType': marker['type'],
+          'eventType': marker['type'].charAt(0).toLocaleUpperCase() + marker['type'].toLocaleLowerCase().slice(1),
           'created_at': timestamp,
           'dateString': timestampAsString(timestamp),
           'dateTime': marker['dateTime'],
@@ -217,20 +217,16 @@ function treatmentEntries(data, offset, offsetMilliseconds) {
 
 function mergeInsulinWithMealTreatments(treatments) {
   treatments.forEach((treatment) => {
-    if(treatment.eventType?.toLocaleUpperCase() === "INSULIN") {
-      treatment.eventType = "Insulin";
-      var matchingMeal = treatments.find((candidate) => {
-        return candidate.dateTime === treatment.dateTime && candidate.eventType?.toLocaleUpperCase() === "MEAL";
+    if(treatment.eventType?.toLocaleUpperCase() === "MEAL") {
+      var matchingInsulin = treatments.find((candidate) => {
+        return candidate.dateTime === treatment.dateTime && candidate.eventType?.toLocaleUpperCase() === "INSULIN";
       });
-      if(matchingMeal) {
-        treatment.carbs = matchingMeal.carbs;
-        matchingMeal.eventType = "Meal";
-        matchingMeal.carbs = 0;
-        matchingMeal.insulin = 0;
+      if(matchingInsulin) {
+        treatment.insulin = matchingInsulin.insulin;
+        matchingInsulin.carbs = 0;
+        matchingInsulin.insulin = 0;
         // Set carbs and insulin for a meal to 0 when it's merged so we can delete these later
       }
-    } else {
-      treatment.eventType = "Meal";
     }
   });
 
