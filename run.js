@@ -33,6 +33,7 @@ var config = {
   verbose: !readEnv('CARELINK_QUIET', true),
   deviceInterval: 5.1 * 60 * 1000,
   patientId: readEnv('CARELINK_PATIENT'),
+  maxNightscoutDiff: 230
 };
 
 if (!config.username) {
@@ -99,7 +100,6 @@ function filterMissingSgvs(minimedSgvs,nightscoutSgvs) {
 
     var matchingNightscoutSgvs = getMatchingNightscoutSgv(minimedSgv,nightscoutSgvs);
     if(matchingNightscoutSgvs.length === 0) {
-      //console.warn(`> Adding ${minimedSgv.sgv} @ ${new Date(minimedSgv.date).toLocaleString()}`);
       out.push(minimedSgv);
     } else if (matchingNightscoutSgvs.length > 1) {
       console.error(`Something went wrong: More than 1 matching nightscout entry was returned for ${minimedSgv.sgv} @ ${new Date(minimedSgv.date).toLocaleString()}`);
