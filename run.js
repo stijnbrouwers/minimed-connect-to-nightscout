@@ -33,7 +33,7 @@ var config = {
   verbose: !readEnv('CARELINK_QUIET', true),
   deviceInterval: 5.1 * 60 * 1000,
   patientId: readEnv('CARELINK_PATIENT'),
-  maxNightscoutDiff: 230
+  maxNightscoutDiff: 270
 };
 
 if (!config.username) {
