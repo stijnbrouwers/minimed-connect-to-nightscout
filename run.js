@@ -29,6 +29,8 @@ var config = {
   nsSecret: readEnv('API_SECRET'),
   interval: parseInt(readEnv('CARELINK_REQUEST_INTERVAL', 60 * 1000), 10),
   sgvLimit: parseInt(readEnv('CARELINK_SGV_LIMIT', 24), 10),
+  treatmentLimit: parseInt(readEnv('CARELINK_TREATMENT_LIMIT', 24), 10),
+  bgCheckLimit: parseInt(readEnv('CARELINK_BG_CHECK_LIMIT', 24), 10),
   maxRetryDuration: parseInt(readEnv('CARELINK_MAX_RETRY_DURATION', carelink.defaultMaxRetryDuration), 10),
   verbose: !readEnv('CARELINK_QUIET', true),
   deviceInterval: 5.1 * 60 * 1000,
@@ -50,6 +52,7 @@ var client = carelink.Client({
 });
 var entriesUrl = (config.nsBaseUrl ? config.nsBaseUrl : 'https://' + config.nsHost) + '/api/v1/entries.json';
 var devicestatusUrl = (config.nsBaseUrl ? config.nsBaseUrl : 'https://' + config.nsHost) + '/api/v1/devicestatus.json';
+var treatmentsUrl = (config.nsBaseUrl ? config.nsBaseUrl : 'https://' + config.nsHost) + '/api/v1/treatments.json';
 
 logger.setVerbose(config.verbose);
 
@@ -58,6 +61,14 @@ var filterSgvs = filter.makeRecencyFilter(function(item) {
 });
 
 var filterDeviceStatus = filter.makeRecencyFilter(function(item) {
+  return new Date(item['created_at']).getTime();
+});
+
+var filterTreatments = filter.makeRecencyFilter(function(item) {
+  return new Date(item['created_at']).getTime();
+});
+
+var filterbgCheckEntries = filter.makeRecencyFilter(function(item) {
   return new Date(item['created_at']).getTime();
 });
 
@@ -138,7 +149,7 @@ function requestLoop() {
         console.log(err);
         setTimeout(requestLoop, config.deviceInterval);
       } else {
-        let transformed = transform(data, config.sgvLimit);
+        let transformed = transform(data, config.sgvLimit, config.treatmentLimit, config.bgCheckLimit);
 
         nightscout.get(entriesUrl+'?count='+(config.sgvLimit+5),config.nsSecret,function(err, response) {
           const nightscoutSgvs = response.body;
@@ -160,17 +171,21 @@ function requestLoop() {
               }
             }
           }
+        let newTreatments = filterTreatments(transformed.treatments);
 
-          // Calculate interval by the device next upload time
-          let interval = config.deviceInterval - (data.currentServerTime - data.lastMedicalDeviceDataUpdateServerTime);
-          if (interval > config.deviceInterval || interval < 0)
-            interval = config.deviceInterval;
+        let newbgCheckEntries = filterbgCheckEntries(transformed.bgCheckEntries);
 
-          logger.log(`Next check ${Math.round(interval / 1000)}s later (at ${new Date(Date.now() + interval)})`)
+        // Calculate interval by the device next upload time
+        let interval = config.deviceInterval - (data.currentServerTime - data.lastMedicalDeviceDataUpdateServerTime);
+        if (interval > config.deviceInterval || interval < 0)
+          interval = config.deviceInterval;
 
-          uploadMaybe(newSgvs, entriesUrl, function() {
-            uploadMaybe(newDeviceStatuses, devicestatusUrl, function() {
-              setTimeout(requestLoop, interval);
+        uploadMaybe(newSgvs, entriesUrl, function() {
+          uploadMaybe(newDeviceStatuses, devicestatusUrl, function() {
+            uploadMaybe(newTreatments, treatmentsUrl, function() {
+              uploadMaybe(newbgCheckEntries, treatmentsUrl, function() {
+                setTimeout(requestLoop, interval);
+              });
             });
           });
         });
