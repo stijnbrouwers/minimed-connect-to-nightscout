@@ -171,26 +171,27 @@ function requestLoop() {
               }
             }
           }
-        let newTreatments = filterTreatments(transformed.treatments);
+          let newTreatments = filterTreatments(transformed.treatments);
 
-        let newbgCheckEntries = filterbgCheckEntries(transformed.bgCheckEntries);
+          let newbgCheckEntries = filterbgCheckEntries(transformed.bgCheckEntries);
 
-        // Calculate interval by the device next upload time
-        let interval = config.deviceInterval - (data.currentServerTime - data.lastMedicalDeviceDataUpdateServerTime);
-        if (interval > config.deviceInterval || interval < 0)
-          interval = config.deviceInterval;
+          // Calculate interval by the device next upload time
+          let interval = config.deviceInterval - (data.currentServerTime - data.lastMedicalDeviceDataUpdateServerTime);
+          if (interval > config.deviceInterval || interval < 0)
+            interval = config.deviceInterval;
 
-        uploadMaybe(newSgvs, entriesUrl, function() {
-          uploadMaybe(newDeviceStatuses, devicestatusUrl, function() {
-            uploadMaybe(newTreatments, treatmentsUrl, function() {
-              uploadMaybe(newbgCheckEntries, treatmentsUrl, function() {
-                setTimeout(requestLoop, interval);
+          uploadMaybe(newSgvs, entriesUrl, function() {
+            uploadMaybe(newDeviceStatuses, devicestatusUrl, function() {
+              uploadMaybe(newTreatments, treatmentsUrl, function() {
+                uploadMaybe(newbgCheckEntries, treatmentsUrl, function() {
+                  setTimeout(requestLoop, interval);
+                });
               });
             });
           });
         });
       }
-    });
+    })
   } catch (error) {
     console.error(error);
     setTimeout(requestLoop, config.deviceInterval);
