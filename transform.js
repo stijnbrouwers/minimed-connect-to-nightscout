@@ -218,15 +218,19 @@ function treatmentEntries(data, offset, offsetMilliseconds) {
 function mergeInsulinWithMealTreatments(treatments) {
   treatments.forEach((treatment) => {
     if(treatment.eventType === "INSULIN") {
+      treatment.eventType = "Insulin";
       var matchingMeal = treatments.find((candidate) => {
         return candidate.dateTime === treatment.dateTime && candidate.eventType === "MEAL";
       });
       if(matchingMeal) {
         treatment.carbs = matchingMeal.carbs;
+        matchingMeal.eventType = "Meal";
         matchingMeal.carbs = 0;
         matchingMeal.insulin = 0;
         // Set carbs and insulin for a meal to 0 when it's merged so we can delete these later
       }
+    } else {
+      treatment.eventType = "Meal";
     }
   });
 
