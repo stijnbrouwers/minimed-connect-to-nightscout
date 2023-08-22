@@ -136,7 +136,7 @@ function filterMissingSgvs(minimedSgvs,nightscoutSgvs) {
   out.forEach(svg => {
     let dateBefore = svg.date;
     svg.date += averageTimeDiff;
-    console.warn(`> Adding ${svg.sgv} @ ${new Date(dateBefore).toLocaleString()} =>${new Date(svg.date).toLocaleString()}`);
+    //console.warn(`> Adding ${svg.sgv} @ ${new Date(dateBefore).toLocaleString()} =>${new Date(svg.date).toLocaleString()}`);
   });
 
   return out;
