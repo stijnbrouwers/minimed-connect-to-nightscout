@@ -18,7 +18,7 @@ var DEFAULT_CARELINKSERVERADDRESS = MMCONNECT_SERVERNAME || (CARELINK_EU ? "care
 
 var DEFAULT_COUNTRYCODE = process.env['MMCONNECT_COUNTRYCODE'] || 'gb';
 var DEFAULT_LANGCODE = process.env['MMCONNECT_LANGCODE'] || 'en';
-
+var FIRST_TIME_LOGIN = true;
 
 var Client = exports.Client = function (options) {
   var CARELINKEU_LOGIN_LOCALE = { country: options.countrycode || DEFAULT_COUNTRYCODE
@@ -109,10 +109,16 @@ var Client = exports.Client = function (options) {
     }
 
     function haveCookie(cookieName) {
+        if(FIRST_TIME_LOGIN && process.env[cookieName]) { 
+            return true; 
+        }
         return _.some(getCookies(), {key: cookieName});
     }
 
     function getCookie(cookieName) {
+        if(FIRST_TIME_LOGIN && process.env[cookieName]) { 
+            return {value:process.env[cookieName]}; 
+        }
         return _.find(getCookies(), {key: cookieName});
     }
 
@@ -222,8 +228,18 @@ var Client = exports.Client = function (options) {
         logger.log('Refresh EU token');
 
         return await axiosInstance
-            .post(CARELINKEU_REFRESH_TOKEN_URL)
+            .post(CARELINKEU_REFRESH_TOKEN_URL,null,{
+                headers: {
+                    'Authorization': `Bearer ${_.get(getCookie(CARELINKEU_TOKEN_COOKIE), 'value', '')}`,
+                    'Content-Type': `application/json; charset=utf-8`
+                },
+                params: {
+                    locale: DEFAULT_LANGCODE,
+                    country: DEFAULT_COUNTRYCODE
+                }
+            })
             .then(response => {
+                FIRST_TIME_LOGIN = false;
                 axiosInstance.defaults.headers.common = {
                     'Authorization': `Bearer ${_.get(getCookie(CARELINKEU_TOKEN_COOKIE), 'value', '')}`,
                     'Cookie': ''
@@ -275,7 +291,7 @@ var Client = exports.Client = function (options) {
                 let expire = new Date(Date.parse(_.get(getCookie(CARELINKEU_TOKENEXPIRE_COOKIE), 'value')));
 
                 // Refresh token if expires in 6 minutes
-                if (expire < new Date(Date.now() + 6 * 60 * 1000))
+                if (expire < new Date(Date.now() + 6 * 60 * 1000) || FIRST_TIME_LOGIN)
                     await refreshTokenEu();
             } else {
                 logger.log('Logging in to CareLink');
@@ -293,6 +309,7 @@ var Client = exports.Client = function (options) {
                 await doFetchCookie(response)
             }
         }
+        FIRST_TIME_LOGIN = false;
     }
 
     function sleep(ms) {
