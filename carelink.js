@@ -124,7 +124,8 @@ var Client = exports.Client = function (options) {
     }
 
     function deleteCookies() {
-        return axiosInstance.defaults.jar.removeAllCookiesSync();
+        console.debug("not doing delete cookies...");
+        //return axiosInstance.defaults.jar.removeAllCookiesSync();
     }
 
     function removeCookie(domain, path, key) {
@@ -329,6 +330,7 @@ var Client = exports.Client = function (options) {
                     data = (await getConnectData()).data;
                     break;
                 } catch (e1) {
+                    console.log(e1);
                     deleteCookies();
 
                     if (i === maxRetry)
