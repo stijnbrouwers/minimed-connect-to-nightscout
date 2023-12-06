@@ -290,7 +290,7 @@ var Client = exports.Client = function (options) {
                 let expire = new Date(Date.parse(_.get(getCookie(CARELINKEU_TOKENEXPIRE_COOKIE), 'value')));
 
                 // Refresh token if expires in 6 minutes
-                if (expire < new Date(Date.now() + 6 * 60 * 1000) || FIRST_TIME_LOGIN)
+                if (expire < new Date(Date.now() + 60 * 60 * 1000) || FIRST_TIME_LOGIN)
                     await refreshTokenEu();
             } else {
                 logger.log('Logging in to CareLink');
