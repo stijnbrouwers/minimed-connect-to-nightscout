@@ -74,7 +74,7 @@ var filterbgCheckEntries = filter.makeRecencyFilter(function(item) {
 
 function uploadMaybe(items, endpoint, callback) {
   if (items.length === 0) {
-    logger.log('No new items for ' + endpoint);
+    logger.verbose('No new items for ' + endpoint);
     callback();
   } else {
     nightscout.upload(items, endpoint, config.nsSecret, function(err, response) {
@@ -205,5 +205,5 @@ function getRandomInt(max) {
 // Safety function to avoid ban for managed environments (it only happens once, on the start)
 let waitTime = 0;
 if (process.env.RANDOMIZE_INIT) { waitTime = getRandomInt(3 * 60 * 1000); }
-logger.log(`[MMConnect] Wait ${Math.round(waitTime / 1000)} seconds before start`);
+logger.verbose(`[MMConnect] Wait ${Math.round(waitTime / 1000)} seconds before start`);
 setTimeout(requestLoop, waitTime);

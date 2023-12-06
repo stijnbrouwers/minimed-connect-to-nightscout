@@ -8,10 +8,13 @@ module.exports = (function() {
     setVerbose: function(v) {
       verbose_ = v;
     },
-    log: function(str) {
+    verbose: function(str) {
       if(verbose_) {
         console.log(new Date(), arguments); 
       }
+    },
+    log: function(str) {
+      console.log(new Date(), arguments);
     }
   };
 })();

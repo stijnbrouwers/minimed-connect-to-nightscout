@@ -153,18 +153,18 @@ var Client = exports.Client = function (options) {
 
     async function doLoginEu1() {
         deleteCookies();
-        logger.log('EU login 1');
+        logger.verbose('EU login 1');
         let url = urllib.parse(CARELINKEU_LOGIN_URL);
         var query = _.merge(qs.parse(url.query), CARELINKEU_LOGIN_LOCALE);
         url = urllib.format(_.merge(url, { search: null, query: query }));
 
         deleteCookies();
-        logger.log('EU login 1', url);
+        logger.verbose('EU login 1', url);
         return await axiosInstance.get(url);
     }
 
     async function doLoginEu2(response) {
-        logger.log(`EU login 2 (url: ${response.headers.location})`);
+        logger.verbose(`EU login 2 (url: ${response.headers.location})`);
         return await axiosInstance.get(response.headers.location);
     }
 
@@ -174,7 +174,7 @@ var Client = exports.Client = function (options) {
 
         let url = `${uri.origin}${uri.pathname}?locale=${uriParam.get('locale')}&countrycode=${uriParam.get('countrycode')}`;
 
-        logger.log(`EU login 3 (url: ${url})`);
+        logger.verbose(`EU login 3 (url: ${url})`);
         response = await axiosInstance.post(url, qs.stringify({
             sessionID: uriParam.get('sessionID'),
             sessionData: uriParam.get('sessionData'),
@@ -203,7 +203,7 @@ var Client = exports.Client = function (options) {
         regex = /(<input type="hidden" name="sessionData" value=")(.*)"/gm;
         let sessionData = (regex.exec(response.data)[2] || []) || '';
 
-        logger.log(`EU login 4 (url: ${url}, sessionID: ${sessionId}, sessionData: ${sessionData})`);
+        logger.verbose(`EU login 4 (url: ${url}, sessionID: ${sessionId}, sessionData: ${sessionData})`);
         return await axiosInstance.post(url, qs.stringify({
             action: "consent",
             sessionID: sessionId,
@@ -216,7 +216,7 @@ var Client = exports.Client = function (options) {
     }
 
     async function doLoginEu5(response) {
-        logger.log(`EU login 5 (url: ${response.headers.location})`);
+        logger.verbose(`EU login 5 (url: ${response.headers.location})`);
         await axiosInstance.get(response.headers.location, {maxRedirects: 0});
 
         removeCookie('carelink.minimed.eu', '/', 'codeVerifier')
@@ -227,7 +227,7 @@ var Client = exports.Client = function (options) {
     }
 
     async function refreshTokenEu() {
-        logger.log('Refresh EU token');
+        logger.verbose('Refresh EU token');
 
         return await axiosInstance
             .post(CARELINKEU_REFRESH_TOKEN_URL,null,{
@@ -264,7 +264,7 @@ var Client = exports.Client = function (options) {
             dataRetrievalUrl = resp.data.blePereodicDataEndpoint;
           }
           if(dataRetrievalUrl) {
-                logger.log('GET data (as carepartner) ' + dataRetrievalUrl);
+                logger.verbose('GET data (as carepartner) ' + dataRetrievalUrl);
                 var body = {
                     username: options.username,
                     role: "carepartner",
@@ -278,7 +278,7 @@ var Client = exports.Client = function (options) {
           }
       } else {
         var url = await carelinkJsonUrlNow();
-        logger.log('GET data ' + url);
+        logger.verbose('GET data ' + url);
         return await axiosInstance.get(url);
       }
     }
@@ -293,7 +293,7 @@ var Client = exports.Client = function (options) {
                 if (expire < new Date(Date.now() + 6 * 60 * 1000) || FIRST_TIME_LOGIN)
                     await refreshTokenEu();
             } else {
-                logger.log('Logging in to CareLink');
+                logger.verbose('Logging in to CareLink');
                 let response = await doLoginEu1();
                 response = await doLoginEu2(response);
                 response = await doLoginEu3(response);
@@ -303,7 +303,7 @@ var Client = exports.Client = function (options) {
         } else {
             // US - Cookie method
             if (!haveCookie(CARELINK_LOGIN_COOKIE)) {
-                logger.log('Logging in to CareLink');
+                logger.verbose('Logging in to CareLink');
                 let response = await doLogin()
                 await doFetchCookie(response)
             }

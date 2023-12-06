@@ -66,7 +66,7 @@ var guessPumpOffset = (function () {
     var hours = Math.round((pumpTimeAsIfUTC - serverTimeUTC) / (60 * 60 * 1000));
     var offset = (hours >= 0 ? '+' : '-') + (Math.abs(hours) < 10 ? '0' : '') + Math.abs(hours) + '00';
     if (offset !== lastGuess) {
-      logger.log('Guessed pump timezone ' + offset + ' (pump time: "' + data['sMedicalDeviceTime'] + '"; server time: ' + new Date(data['currentServerTime']) + ')');
+      logger.verbose('Guessed pump timezone ' + offset + ' (pump time: "' + data['sMedicalDeviceTime'] + '"; server time: ' + new Date(data['currentServerTime']) + ')');
     }
     lastGuess = offset;
     return offset;
@@ -240,7 +240,7 @@ function mergeInsulinWithMealTreatments(treatments) {
 module.exports = function (data, sgvLimit, treatmentLimit, bgCheckLimit) {
   var recency = (data['currentServerTime'] - data['lastMedicalDeviceDataUpdateServerTime']) / (60 * 1000);
   if (recency > STALE_DATA_THRESHOLD_MINUTES) {
-    logger.log('Stale CareLink data: ' + recency.toFixed(2) + ' minutes old');
+    logger.verbose('Stale CareLink data: ' + recency.toFixed(2) + ' minutes old');
     return {
       devicestatus: [],
       entries: [],
