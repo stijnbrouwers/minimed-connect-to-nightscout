@@ -35,7 +35,7 @@ var config = {
   verbose: !readEnv('CARELINK_QUIET', true),
   deviceInterval: 5.1 * 60 * 1000,
   patientId: readEnv('CARELINK_PATIENT'),
-  maxNightscoutDiff: 270,
+  maxNightscoutDiff: 300,
   debug: !readEnv('CARELINK_DEBUG', true),
 };
 
