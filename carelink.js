@@ -248,7 +248,7 @@ var Client = exports.Client = function (options) {
                 };
             })
             .catch(async function (error) {
-                console.error(`[MMConnect] Refresh EU token failed (${error})`);
+                logger.error(`[MMConnect] Refresh EU token failed (${error})`);
                 deleteCookies();
                 await checkLogin(true);
             });
@@ -290,8 +290,10 @@ var Client = exports.Client = function (options) {
                 let expire = new Date(Date.parse(_.get(getCookie(CARELINKEU_TOKENEXPIRE_COOKIE), 'value')));
 
                 // Refresh token if expires in 6 minutes
-                if (expire < new Date(Date.now() + 6 * 60 * 1000) || FIRST_TIME_LOGIN)
+                if (expire < new Date(Date.now() + 6 * 60 * 1000) || FIRST_TIME_LOGIN) {
+                    logger.debug(`${expire} < ${new Date(Date.now() + 6 * 60 * 1000)}`)
                     await refreshTokenEu();
+                }
             } else {
                 logger.verbose('Logging in to CareLink');
                 let response = await doLoginEu1();

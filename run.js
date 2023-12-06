@@ -35,7 +35,8 @@ var config = {
   verbose: !readEnv('CARELINK_QUIET', true),
   deviceInterval: 5.1 * 60 * 1000,
   patientId: readEnv('CARELINK_PATIENT'),
-  maxNightscoutDiff: 270
+  maxNightscoutDiff: 270,
+  debug: !readEnv('CARELINK_DEBUG', true),
 };
 
 if (!config.username) {
@@ -55,6 +56,7 @@ var devicestatusUrl = (config.nsBaseUrl ? config.nsBaseUrl : 'https://' + config
 var treatmentsUrl = (config.nsBaseUrl ? config.nsBaseUrl : 'https://' + config.nsHost) + '/api/v1/treatments.json';
 
 logger.setVerbose(config.verbose);
+logger.setDebug(config.debug);
 
 var filterSgvs = filter.makeRecencyFilter(function(item) {
   return item['date'];
@@ -113,9 +115,9 @@ function filterMissingSgvs(minimedSgvs,nightscoutSgvs) {
     if(matchingNightscoutSgvs.length === 0) {
       out.push(minimedSgv);
     } else if (matchingNightscoutSgvs.length > 1) {
-      console.error(`Something went wrong: More than 1 matching nightscout entry was returned for ${minimedSgv.sgv} @ ${new Date(minimedSgv.date).toLocaleString()}`);
+      logger.error(`Something went wrong: More than 1 matching nightscout entry was returned for ${minimedSgv.sgv} @ ${new Date(minimedSgv.date).toLocaleString()}`);
       matchingNightscoutSgvs.forEach(matchingNightscoutSgv => {
-        console.error(`\tNS match = ${matchingNightscoutSgv.sgv} @ ${new Date(matchingNightscoutSgv.date)}`)
+        logger.error(`\tNS match = ${matchingNightscoutSgv.sgv} @ ${new Date(matchingNightscoutSgv.date)}`)
       });
     } else {
       var matchingNightscoutSgv = matchingNightscoutSgvs[0];
@@ -193,7 +195,7 @@ function requestLoop() {
       }
     })
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     setTimeout(requestLoop, config.deviceInterval);
   }
 }
