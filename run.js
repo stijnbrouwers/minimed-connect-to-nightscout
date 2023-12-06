@@ -134,7 +134,6 @@ function filterMissingSgvs(minimedSgvs,nightscoutSgvs) {
   }
 
   let averageTimeDiff = Math.round(totalTimeDiff/matchCount);
-  console.log(`average time diff: ${averageTimeDiff}`);
   out.forEach(svg => {
     let dateBefore = svg.date;
     svg.date += averageTimeDiff;
