@@ -57,6 +57,9 @@ var treatmentsUrl = (config.nsBaseUrl ? config.nsBaseUrl : 'https://' + config.n
 
 logger.setVerbose(config.verbose);
 logger.setDebug(config.debug);
+logger.debug(`*****************`);
+logger.debug(`Debugging enabled`);
+logger.debug(`*****************`);
 
 var filterSgvs = filter.makeRecencyFilter(function(item) {
   return item['date'];
