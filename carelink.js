@@ -284,14 +284,16 @@ var Client = exports.Client = function (options) {
     }
 
     async function checkLogin(relogin = false) {
+        logger.debug(`checkLogin(relogin=${relogin})`)
         if (1 || CARELINK_EU) {
             // EU - SSO method
+            
             if (!relogin && (haveCookie(CARELINKEU_TOKEN_COOKIE) || haveCookie(CARELINKEU_TOKENEXPIRE_COOKIE))) {
                 let expire = new Date(Date.parse(_.get(getCookie(CARELINKEU_TOKENEXPIRE_COOKIE), 'value')));
 
+                logger.debug(`${expire} < ${new Date(Date.now() + 6 * 60 * 1000)} = ${expire < new Date(Date.now() + 6 * 60 * 1000)}`)
                 // Refresh token if expires in 6 minutes
                 if (expire < new Date(Date.now() + 6 * 60 * 1000) || FIRST_TIME_LOGIN) {
-                    logger.debug(`${expire} < ${new Date(Date.now() + 6 * 60 * 1000)}`)
                     await refreshTokenEu();
                 }
             } else {
