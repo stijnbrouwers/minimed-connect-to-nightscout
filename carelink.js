@@ -229,6 +229,7 @@ var Client = exports.Client = function (options) {
     async function refreshTokenEu() {
         logger.verbose('Refresh EU token');
 
+        logger.debug(`Cookies before refresh: ${_.get(getCookie(CARELINKEU_TOKENEXPIRE_COOKIE), 'value')} - ${_.get(getCookie(CARELINKEU_TOKEN_COOKIE), 'value','')}`)
         return await axiosInstance
             .post(CARELINKEU_REFRESH_TOKEN_URL,null,{
                 headers: {
@@ -242,6 +243,7 @@ var Client = exports.Client = function (options) {
             })
             .then(response => {
                 FIRST_TIME_LOGIN = false;
+                logger.debug(`Cookies after refresh: ${_.get(getCookie(CARELINKEU_TOKENEXPIRE_COOKIE), 'value')} - ${_.get(getCookie(CARELINKEU_TOKEN_COOKIE), 'value','')}`)
                 axiosInstance.defaults.headers.common = {
                     'Authorization': `Bearer ${_.get(getCookie(CARELINKEU_TOKEN_COOKIE), 'value', '')}`,
                     'Cookie': ''
@@ -250,7 +252,7 @@ var Client = exports.Client = function (options) {
             .catch(async function (error) {
                 logger.error(`[MMConnect] Refresh EU token failed (${error})`);
                 deleteCookies();
-                await checkLogin(true);
+                await checkLogin(false);
             });
     }
 
@@ -284,7 +286,6 @@ var Client = exports.Client = function (options) {
     }
 
     async function checkLogin(relogin = false) {
-        logger.debug(`checkLogin(relogin=${relogin})`)
         if (1 || CARELINK_EU) {
             // EU - SSO method
             
