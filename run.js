@@ -36,7 +36,7 @@ var config = {
   deviceInterval: 5.1 * 60 * 1000,
   patientId: readEnv('CARELINK_PATIENT'),
   maxNightscoutDiff: 300,
-  debug: !readEnv('CARELINK_DEBUG', true),
+  debug: readEnv('CARELINK_DEBUG', true),
 };
 
 if (!config.username) {
